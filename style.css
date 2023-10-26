@@ -4,4 +4,34 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+}
+
+button {
+  margin: 15px 0;
+}
+
+.question {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.question__answer {
+  margin: 15px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.question__correct {
+  border: 1px solid green;
+
+}
+
+.question__incorrect {
+  border: 1px solid red;
+
 }

@@ -1,57 +1,127 @@
 class Test {
   private questions: Question[] = []
   private questionsAmount: number = 0
+  private correctAnswers: number[] = []
 
   public addQuestion(question: Question) {
     this.questions.push(question)
+    this.questionsAmount++
   }
-  private get75PercentOfQuestions() {
-    let percentAmount = (this.questionsAmount / 75) * 100
+  private get25PercentOfQuestions() {
+    let percentAmount = Math.floor(this.questionsAmount * (25 / 100))
     console.log(percentAmount)
     return percentAmount
   }
 
-  private getRandomQuestions() {
-    let p = this.get75PercentOfQuestions()
+  public start() {
+    this.displayQuestions()
 
-    let partialQuestions: Question[] = []
+    let endTestButton = document.createElement('button')
+    endTestButton.setAttribute('id', 'end__test')
+    endTestButton.innerText = 'end test'
+    document.body.appendChild(endTestButton)
+    let timer = new Timer()
+    timer.start()
+
+    if (timer.hasExpired()) {
+      this.end(timer)
+    }
+
+    endTestButton.onclick = () => {
+      this.end(timer)
+    }
+  }
+
+  public end(timer: Timer) {
+    timer.stop()
+
+    let statisticsDiv = document.createElement('div')
+    statisticsDiv.classList.add('stats')
+    statisticsDiv.innerHTML = `correct answers: ${this.correctAnswers.length}/${this.questionsAmount}`
+    document.body.appendChild(statisticsDiv)
+  }
+
+  public getRandomQuestions() {
+    let p = this.get25PercentOfQuestions()
+
+    let partialQuestions: Question[] = this.questions
 
     for (let i = 0; i < p; i++) {
-      var randomItem =
-        this.questions[Math.floor(Math.random() * this.questions.length)]
-      partialQuestions.push(randomItem)
+      var randomItem = Math.floor(Math.random() * this.questions.length)
+      partialQuestions.splice(randomItem, 1)
     }
+    console.log('pk')
     console.log(partialQuestions)
+
+    this.questions = partialQuestions
   }
 
   public displayQuestions() {
     this.questions.forEach(q => {
-      this.createQuestionForDisplay(q)
+      this.createQuestionMarkup(q)
     })
   }
 
-  private createQuestionForDisplay(question: Question) {
+  private createQuestionMarkup(question: Question) {
+    let classRef = this
     let questionsWrapper: HTMLDivElement = document.querySelector(
-      '.questions__wrapper',
+      '.questions__wrapper'
     )!
 
     // quesion itself
-    let l__question: HTMLDivElement = document.createElement('div')
-    l__question.classList.add('question')
+    let currentQuestion: HTMLDivElement = document.createElement('div')
+    currentQuestion.classList.add('question')
     // title
-    let l__question__title: HTMLDivElement = document.createElement('div')
-    l__question__title.classList.add('question__title')
-    l__question__title.innerText = question.title
-    l__question.appendChild(l__question__title)
+    let currentQuestionTitle: HTMLDivElement = document.createElement('div')
+    currentQuestionTitle.classList.add('question__title')
+    currentQuestionTitle.innerText = question.title
+    currentQuestion.appendChild(currentQuestionTitle)
     // answers
-    for (let answer in question.answers) {
+    for (let answerIdx in question.answers) {
+      // answer
+
+      let answerDiv = document.createElement('div')
+      answerDiv.classList.add('question__answer')
+      currentQuestion.appendChild(answerDiv)
       let answerRadioButton = document.createElement('input')
       answerRadioButton.type = 'radio'
-      answerRadioButton.innerText = answer
-      l__question.appendChild(answerRadioButton)
+      console.log(question.answers[answerIdx])
+
+      answerRadioButton.innerText = question.answers[answerIdx]
+
+      let answerLabel: HTMLLabelElement = document.createElement('label')
+      answerLabel.classList.add('question__answer__label')
+      answerLabel.innerText = question.answers[answerIdx]
+
+      answerDiv.appendChild(answerRadioButton)
+      answerDiv.appendChild(answerLabel)
+      // answer logic
+      answerRadioButton.onclick = function () {
+        console.log(`clicked ${answerIdx}`)
+        let isCorrect = question.checkAnswer(+answerIdx)
+        questionsWrapper.querySelectorAll('input').forEach(i => {
+          if (i != answerRadioButton) {
+            i.checked = false
+          }
+        })
+
+        // correct/incorrect answers
+
+        if (isCorrect) {
+          questionsWrapper.classList.add('question__correct')
+          if (+answerIdx in classRef.correctAnswers) {
+          } else {
+            classRef.correctAnswers.push(+answerIdx)
+          }
+          console.log(`correct answers: ${classRef.correctAnswers}`)
+          // cursor position
+        } else {
+          questionsWrapper.classList.add('question__incorrect')
+        }
+      }
     }
 
-    questionsWrapper.appendChild(l__question)
+    questionsWrapper.appendChild(currentQuestion)
   }
 }
 
@@ -70,17 +140,68 @@ class Question {
   }
 }
 
+class Timer {
+  public seconds: number
+  private intervalId: number | null
+  constructor(public minutes = 5) {
+    this.seconds = minutes * 60
+    this.intervalId = null
+  }
+
+  hasExpired() {
+    return this.seconds === 0
+  }
+
+  start() {
+    this.intervalId = setInterval(() => {
+      this.seconds -= 1
+      let minutes = Math.floor((this.seconds % 3600) / 60)
+      let seconds = this.seconds % 60
+
+      document.getElementById('timer__wrapper')!.innerText = `${minutes
+        .toString()
+        .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+
+      if (this.seconds === 0) this.stop()
+    }, 1000)
+  }
+
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+    }
+  }
+}
+
+// main
+
 let startButton: HTMLButtonElement = document.querySelector('#start__test')!
 
 startButton.onclick = function () {
   let test = new Test()
-  let question = new Question(
-    'how to get array element',
-    ['array[i]', 'Array.get(i)'],
-    0,
-  )
+  let questions = [
+    new Question('how to get array element 1', ['array[i]', 'Array.get(i)'], 0),
+    new Question('how to get array element 2', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 3', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 4', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 5', ['array[i]', 'Array.get(i)'], 0),
+    new Question('how to get array element 6', ['array[i]', 'Array.get(i)'], 0),
+    new Question('how to get array element 7', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 8', ['array[i]', 'Array.get(i)'], 0),
+    new Question('how to get array element 9', ['array[i]', 'Array.get(i)'], 1),
+    new Question(
+      'how to get array element 10',
+      ['array[i]', 'Array.get(i)'],
+      0
+    ),
+  ]
 
-  test.addQuestion(question)
-
-  test.displayQuestions()
+  questions.forEach(q => {
+    test.addQuestion(q)
+  })
+  test.getRandomQuestions()
+  test.start()
 }
+
+// main
