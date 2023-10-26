@@ -1,7 +1,7 @@
 class Test {
   private questions: Question[] = []
   private questionsAmount: number = 0
-  private correctAnswers: number[] = []
+  private correctAnswers: string[] = []
 
   public addQuestion(question: Question) {
     this.questions.push(question)
@@ -65,7 +65,7 @@ class Test {
   private createQuestionMarkup(question: Question) {
     let classRef = this
     let questionsWrapper: HTMLDivElement = document.querySelector(
-      '.questions__wrapper'
+      '.questions__wrapper',
     )!
 
     // quesion itself
@@ -108,15 +108,15 @@ class Test {
         // correct/incorrect answers
 
         if (isCorrect) {
-          questionsWrapper.classList.add('question__correct')
-          if (+answerIdx in classRef.correctAnswers) {
+          currentQuestion.classList.add('question__correct')
+          if (question.answers[answerIdx] in classRef.correctAnswers) {
           } else {
-            classRef.correctAnswers.push(+answerIdx)
+            classRef.correctAnswers.push(question.answers[answerIdx])
           }
           console.log(`correct answers: ${classRef.correctAnswers}`)
           // cursor position
         } else {
-          questionsWrapper.classList.add('question__incorrect')
+          currentQuestion.classList.add('question__incorrect')
         }
       }
     }
@@ -182,18 +182,18 @@ startButton.onclick = function () {
   let test = new Test()
   let questions = [
     new Question('how to get array element 1', ['array[i]', 'Array.get(i)'], 0),
-    new Question('how to get array element 2', ['array[i]', 'Array.get(i)'], 1),
-    new Question('how to get array element 3', ['array[i]', 'Array.get(i)'], 1),
-    new Question('how to get array element 4', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 2', ['array[i]', 'Array.get(i)'], 0),
+    new Question('how to get array element 3', ['array[i]', 'Array.get(i)'], 0),
+    new Question('how to get array element 4', ['array[i]', 'Array.get(i)'], 0),
     new Question('how to get array element 5', ['array[i]', 'Array.get(i)'], 0),
     new Question('how to get array element 6', ['array[i]', 'Array.get(i)'], 0),
-    new Question('how to get array element 7', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 7', ['array[i]', 'Array.get(i)'], 0),
     new Question('how to get array element 8', ['array[i]', 'Array.get(i)'], 0),
-    new Question('how to get array element 9', ['array[i]', 'Array.get(i)'], 1),
+    new Question('how to get array element 9', ['array[i]', 'Array.get(i)'], 0),
     new Question(
       'how to get array element 10',
       ['array[i]', 'Array.get(i)'],
-      0
+      0,
     ),
   ]
 
